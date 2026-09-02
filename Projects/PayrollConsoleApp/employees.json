@@ -1,0 +1,52 @@
+{
+  "employees": [
+    {
+      "id": 1,
+      "name": "Felipe",
+      "lastName": "Agudelo",
+      "identification": "1053844665",
+      "jobTitle": "Desarrollador Software",
+      "baseSalary": 3000000,
+      "workedDays": 30,
+      "overtime": {
+        "dayHours": 7,
+        "nightHours": 1,
+        "holidayDayHours": 4,
+        "holidayNightHours": 3
+      },
+      "holidayDaysWorked": 2
+    },
+    {
+      "id": 2,
+      "name": "John",
+      "lastName": "Agudelo",
+      "identification": "1007231620",
+      "jobTitle": "Pentester",
+      "baseSalary": 5000000,
+      "workedDays": 30,
+      "overtime": {
+        "dayHours": 7,
+        "nightHours": 1,
+        "holidayDayHours": 4,
+        "holidayNightHours": 3
+      },
+      "holidayDaysWorked": 2
+    },
+    {
+      "id": 3,
+      "name": "Natalia",
+      "lastName": "Guerrero",
+      "identification": "1049641638",
+      "jobTitle": "Administradora",
+      "baseSalary": 4000000,
+      "workedDays": 30,
+      "overtime": {
+        "dayHours": 7,
+        "nightHours": 1,
+        "holidayDayHours": 4,
+        "holidayNightHours": 3
+      },
+      "holidayDaysWorked": 2
+    }
+  ]
+}
