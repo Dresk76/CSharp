@@ -1,203 +1,402 @@
-﻿using System.Text.Json.Serialization;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using PayrollConsoleApp;
 
-
-string fileName = "employees.json";
-string path     = Path.Combine(Directory.GetCurrentDirectory(), fileName);
-
-
-Employee florAgudelo = new(
-    id: 1, 
-    name: "Flor", 
-    lastName: "Agudelo", 
-    identification: "30338774",
-    jobTitle: "Artista",
-    baseSalary: 1_750_905m,
-    // baseSalary: 3_501_811m,
-    workedDays: 15,
-    overtime: new Overtime(2m, 2m, 2m, 2m),
-    holidayDaysWorked: 2m
-);
-
-/*
-! SE DEBE QUITAR EL COMENTARIO AL TERMINAR EL PROGRAMA
-*/
-// LIMPIAR CONSOLA
-// Console.Clear();
 
 // MOSTRAR SALUDO
 Initialize.Greeting();
 
-// VALIDAR EXISTENCIA DEL ARCHIVO JSON DE EMPLEADOS
-bool fileFound = EmployeeService.FileExists(path);
-if (!fileFound) return;
+
+// CONFIGURACIÓN DE VISUALIZACIÓN
+bool showEmployeeListInformation    = true; // MOSTRAR LA LISTA COMPLETA DE EMPLEADOS
+bool showEmployeeInformation        = true; // MOSTRAR LA INFORMACIÓN DEL EMPLEADO
+bool showPayrollDetails             = true; // MOSTRAR EL DETALLE DE NÓMINA
+bool showPaySummary                 = true; // MOSTRAR EL RESUMEN DE PAGO
+bool showRateBreakdown              = true; // MOSTRAR DESGLOSE DE TARIFAS
+
+
+// RUTA DEL ARCHIVO
+string fileName                     = "employees.json";
+string path                         = Path.Combine(Directory.GetCurrentDirectory(), fileName);
+
 
 
 
 /*
-* MOSTRAR CÁCLCULO DE UN EMPLEADO
-*/
-ShowEmployeeCalculation(florAgudelo);
+! PRUEBA DEL CÁLCULO DE NÓMINA DE UN EMPLEADO
 
+* Salario mínimo 2026:        1_750_905m
+* Dos salarios mínimos 2026:  3_501_810m
+*/
+
+    // Employee mariaLopez = new(
+    //     id: 3,
+    //     name: "María",
+    //     lastName: "López",
+    //     identification: "1023456789",
+    //     jobTitle: "Desarrolladora Junior",
+    //     baseSalary: 1_750_905m,
+    //     workedDays: 30,
+    //     overtime: new Overtime(5m, 0m, 1m, 0m),
+    //     holidayDaysWorked: 1m
+    // );
+
+    // EmployeeCalculation(employee: mariaLopez,
+    //                     showEmployeeInformation,
+    //                     showPayrollDetails,
+    //                     showPaySummary,
+    //                     showRateBreakdown);
 
 /*
-* MOSTRAR CALCULO DE VARIOS EMPLEADOS
 */
-// List<Employee> employees = ListEmployees(path, true);
-// EmployeeListHourlyRate(employees);
-
-// VALOR DE LA HORA EXTRA PARA UN EMPLEADO
-
-
-// VALOR DE LA HORA BASE DE CADA EMPLEADO DE LA LISTA
-// RegularHour.ShowListRegularHoursCalculation(employees);
-
-// VALOR DE HORA EXTRA DE CADA EMPLEADO DE LA LISTA
-// OvertimeHours.ShowListOvertimeHoursCalculation(employees);
 
 
 
-#region EMPLOYEE
+// MOSTRAR EL CÁLCULO DE LA LISTA DE EMPLEADOS
+EmployeeListCalculation(path, 
+                        showEmployeeListInformation, 
+                        showEmployeeInformation, 
+                        showPayrollDetails,
+                        showPaySummary,
+                        showRateBreakdown);
 
-// MOSTRAR CÁCLCULO DE UN EMPLEADO
-static void ShowEmployeeCalculation(Employee employee)
+
+
+
+
+
+
+#region CÁLCULO DE UN EMPLEADO
+
+static void EmployeeCalculation(Employee employee, 
+                                bool showEmployeeInformation, 
+                                bool showPayrollDetails, 
+                                bool showPaySummary,
+                                bool showRateBreakdown)
 {
-    // EMPLEADO
-    Print.PrintText($"INFORMACIÓN DE EMPLEADO: {employee.Name} {employee.LastName}");
-    Print.PrintLine('-');
+    // INFORMACIÓN DE UN EMPLEADO
+    if (showEmployeeInformation)
+        EmployeeInformation(employee);
 
-    // DATOS DEL EMPLEADO
-    EmployeeService.PrintEmployee(employee);
-
-    // MOSTRAR EL DESGLOSE DE TARIFAS
-    ShowRateBreakdown(employee);
-}
-
-// MOSTRAR EL DESGLOSE DE TARIFAS
-static void ShowRateBreakdown(Employee employee)
-{
-    Print.PrintText($"DESGLOSE DE TARIFAS");
-    Print.PrintLine('-');
-
-    // HORAS HORAS MENSUALES POR LEY
-    decimal monthlyWorkedHours = BaseRateCalculator.CalculateMonthlyLegalHours();
-    BaseRateCalculator.ShowMonthlyLegalHours(monthlyWorkedHours, false);
-
-    // VALOR DEL DIA
-    decimal dailyRate = BaseRateCalculator.CalculateDailyRate(employee.BaseSalary);
-    BaseRateCalculator.ShowDailyRate(dailyRate, false);
-
-    // VALOR DE LA HORA REGULAR
-    decimal hourlyRate = BaseRateCalculator.CalculateHourlyRate(employee.BaseSalary, monthlyWorkedHours);
-    BaseRateCalculator.ShowHourlyRate(hourlyRate, false);
-
-    // VALOR HORA EXTRA DIURNA
-    decimal dayOvertimeRate = OvertimeCalculator.CalculateDayOvertimeRate(hourlyRate);
-    OvertimeCalculator.ShowDayOvertimeRate(dayOvertimeRate, false);
-
-    // VALOR HORA EXTRA NOCTURNA
-    decimal nightOvertimeRate = OvertimeCalculator.CalculateNightOvertimeRate(hourlyRate);
-    OvertimeCalculator.ShowNightOvertimeRate(nightOvertimeRate, false);
-
-    // VALOR HORA EXTRA DIURNA DOMINICAL O FESTIVA
-    decimal holidayDayOvertimeRate = OvertimeCalculator.CalculateHolidayDayOvertimeRate(hourlyRate);
-    OvertimeCalculator.ShowHolidayDayOvertimeRate(holidayDayOvertimeRate, false);
-
-    // VALOR HORA EXTRA NOCTURNA DOMINICAL O FESTIVA
-    decimal holidayNightOvertimeRate = OvertimeCalculator.CalculateHolidayNightOvertimeRate(hourlyRate);
-    OvertimeCalculator.ShowHolidayNightOvertimeRate(holidayNightOvertimeRate, false);
-
-    // VALOR DIAS DOMINICALES O FESTIVOS TRABAJADOS
-    decimal holidayWorkRate = OvertimeCalculator.CalculateHolidayWorkRate(hourlyRate);
-    OvertimeCalculator.ShowHolidayWorkRate(holidayWorkRate, false);
-
-    // VALOR DESCUENTO SALUD
-    decimal healthDeductionAmount = DeductionCalculator.CalculateHealthDeductionAmount(employee.BaseSalary);
-    DeductionCalculator.ShowHealthDeductionAmount(healthDeductionAmount, false);
-
-    // VALOR DESCUENTO PENSIÓN
-    decimal pensionDeductionAmount = DeductionCalculator.CalculatePensionDeductionAmount(employee.BaseSalary);
-    DeductionCalculator.ShowPensionDeductionAmount(pensionDeductionAmount, false);
-
-    // MOSTRAR SI APLLICA PARA AUXILIO DE TRANSPORTE
-    bool isEligibleForTransportAllowance = AllowanceCalculator.IsEligibleForTransportAllowance(employee.BaseSalary);
-    AllowanceCalculator.ShowTransportAllowanceEligibility(isEligibleForTransportAllowance);
-
-    /*
-    ! ELIMINAR ESTOS 3 PRINT AL DESPLEGAR LA APP
-    */
-    Print.ShowMoney("Salario Minimimo Mensual", 1_750_905m, false);
-    Print.ShowMoney("Salario Minimimo Quincenal", 1_750_905m / 2m, false);
-    Print.PrintLine('-');
-
-
-
-
-
-    // MOSTRAR RESUMEN DE NOMINA
-    Print.PrintText($"RESUMEN DE NÓMINA");
-    Print.PrintLine('-');
-
-    // HORAS TRABAJADAS
-    decimal workedHours = BaseRateCalculator.CalculateWorkedHours(employee.WorkedDays);
-    BaseRateCalculator.ShowWorkedHours(workedHours, false);
-
-    // VALOR A PAGAR DEL SALARIO BASE
-    decimal bsePay = BaseRateCalculator.CalculateBasePay(dailyRate, employee.WorkedDays);
-    BaseRateCalculator.ShowBasePay(bsePay, false);
-
-    // VALOR A PAGAR DE LAS HORAS EXTRAS DIURNAS
-    decimal dayOvertimePay = OvertimeCalculator.CalculateDayOvertimePay(employee.Overtime.DayHours, dayOvertimeRate);
-    OvertimeCalculator.ShowDayOvertimePay(dayOvertimePay, false);
-
-    // VALOR A PAGAR DE LAS HORAS EXTRAS NOCTURNAS
-    decimal nightOvertimePay = OvertimeCalculator.CalculateNightOvertimePay(employee.Overtime.NightHours, nightOvertimeRate);
-    OvertimeCalculator.ShowNightOvertimePay(nightOvertimePay, false);
-
-    // VALOR A PAGAR DE LAS HORAS EXTRAS DIURNAS DOMINICALES O FESTIVAS
-    decimal holidayDayOvertimePay = OvertimeCalculator.CalculateHolidayDayOvertimePay(employee.Overtime.HolidayDayHours, holidayDayOvertimeRate);
-    OvertimeCalculator.ShowHolidayDayOvertimePay(holidayDayOvertimePay, false);
-
-    // VALOR A PAGAR DE LAS HORAS EXTRAS NOCTURNAS DOMINICALES O FESTIVAS
-    decimal holidayNightOvertimePay = OvertimeCalculator.CalculateHolidayNightOvertimePay(employee.Overtime.HolidayNightHours, holidayNightOvertimeRate);
-    OvertimeCalculator.ShowHolidayNightOvertimePay(holidayNightOvertimePay, false);
-
-    // VALOR A PAGAR DE DIAS DOMINICALES O FESTIVOS TRABAJADOS
-    decimal holidayWorkPay = OvertimeCalculator.CalculateHolidayWorkPay(employee.HolidayDaysWorked, holidayWorkRate);
-    OvertimeCalculator.ShowHolidayWorkPay(holidayWorkPay, false);
+    // RESUMEN DE NÓMINA
+    EmployeePayrollSummary(employee, showPayrollDetails, showPaySummary, showRateBreakdown);
 }
 
 #endregion
 
 
-#region EMPLOYEE LIST
-
-// DEVOLVER Y MOSTRAR LISTA DE EMPLEADOS
-// static List<Employee> ListEmployees(string path, bool showEmployees = true)
-// {
-//     List<Employee> employees = EmployeeService.ReadFile(path);
-
-//     if (showEmployees)
-//     {
-//         EmployeeService.PrintListEmployees(employees);
-//     }
-
-//     return employees;
-// }
-
-// // MOSTRAR VALOR DE LA HORA REGULAR DE VARIOS EMPLEADOS
-// static void EmployeeListHourlyRate(List<Employee> employees)
-// {
-//     foreach (var employee in employees)
-//     {
-//         var hourlyRate = RegularHour.CalculateHourlyRate(employee.BaseSalary);
-//         RegularHour.ShowCalculateHourlyRate(employee, hourlyRate, showSeparator: false);
-//     }
-//     Print.PrintLine('-');
-// }
 
 
-// MOSTRAR VALOR DE LA HORA EXTRA DE VARIOS EMPLEADOS
+#region CÁLCULO DE UNA LISTA DE EMPLEADOS
+
+static void EmployeeListCalculation(string path, 
+                                    bool showEmployeeListInformation, 
+                                    bool showEmployeeInformation, 
+                                    bool showPayrollDetails, 
+                                    bool showPaySummary,
+                                    bool showRateBreakdown)
+{
+    // VALIDAR EXISTENCIA DEL ARCHIVO JSON DE EMPLEADOS
+    bool fileFound = EmployeeService.FileExists(path);
+    if (!fileFound) return;
+
+
+    // GUARDAR LISTA DE EMPLEADOS
+    List<Employee> employeeList = EmployeeService.ReadFile(path);
+
+
+    // INFORMACIÓN LISTA DE EMPLEADOS
+    if (showEmployeeListInformation)
+        EmployeeListInformation(employeeList);
+
+
+    foreach (var employee in employeeList)
+    {
+        // CÁLCULO DE UN EMPLEADO
+        EmployeeCalculation(employee, 
+                            showEmployeeInformation, 
+                            showPayrollDetails, 
+                            showPaySummary,
+                            showRateBreakdown);
+    }
+}
+
+
+// INFORMACIÓN LISTA DE EMPLEADOS
+static void EmployeeListInformation(List<Employee> employeeList)
+{
+    Print.PrintLine('=');
+    Print.PrintText($"INFORMACIÓN LISTA DE EMPLEADOS");
+    Print.PrintLine('=');
+
+    // MOSTRAR DATOS DE LOS EMPLEADOS
+    EmployeeService.PrintListEmployees(employeeList);
+    Console.WriteLine();
+}
+
+#endregion
+
+
+
+
+#region INFORMACIÓN DE UN EMPLEADO
+
+static void EmployeeInformation(Employee employee)
+{
+    Print.PrintLine('=');
+    Print.PrintText($"INFORMACIÓN DEL EMPLEADO: {employee.Name} {employee.LastName}");
+    Print.PrintLine('=');
+
+
+    // MOSTRAR DATOS DEL EMPLEADO
+    EmployeeService.PrintEmployee(employee, false, true);
+}
+
+#endregion
+
+
+
+
+#region RESUMEN DE NÓMINA DE UN EMPLEADO
+
+static void EmployeePayrollSummary(Employee employee, 
+                                    bool showPayrollDetails, 
+                                    bool showPaySummary, 
+                                    bool showRateBreakdown)
+{
+    #region VALORES DEL EMPLEADO
+
+    decimal baseSalary = employee.BaseSalary;
+    decimal workedDays = employee.WorkedDays;
+    decimal dayOvertimeHours = employee.Overtime.DayHours;
+    decimal nightOvertimeHours = employee.Overtime.NightHours;
+    decimal holidayDayOvertimeHours = employee.Overtime.HolidayDayHours;
+    decimal holidayNightOvertimeHours = employee.Overtime.HolidayNightHours;
+    decimal holidayDaysWorked = employee.HolidayDaysWorked;
+
+    #endregion
+
+
+
+
+    #region VALORES DE TARIFAS
+
+    // HORAS MENSUALES POR LEY
+    decimal monthlyWorkedHours = BaseRateCalculator.CalculateMonthlyLegalHours();
+
+    // VALOR DEL DIA
+    decimal dailyRate = BaseRateCalculator.CalculateDailyRate(baseSalary);
+
+    // VALOR HORA REGULAR
+    decimal hourlyRate = BaseRateCalculator.CalculateHourlyRate(monthlyWorkedHours, baseSalary);
+
+    // VALOR HORA EXTRA DIURNA
+    decimal dayOvertimeRate = OvertimeCalculator.CalculateDayOvertimeRate(hourlyRate);
+
+    // VALOR HORA EXTRA NOCTURNA
+    decimal nightOvertimeRate = OvertimeCalculator.CalculateNightOvertimeRate(hourlyRate);
+
+    // VALOR HORA EXTRA DIURNA EN DOMINGO/FESTIVO
+    decimal holidayDayOvertimeRate = OvertimeCalculator.CalculateHolidayDayOvertimeRate(hourlyRate);
+
+    // VALOR HORA EXTRA NOCTURNA EN DOMINGO/FESTIVO
+    decimal holidayNightOvertimeRate = OvertimeCalculator.CalculateHolidayNightOvertimeRate(hourlyRate);
+
+    // VALOR DIA TRABAJADO EN DOMINGO/FESTIVO
+    decimal holidayWorkRate = OvertimeCalculator.CalculateHolidayWorkRate(hourlyRate);
+
+    // VALIDAR SI APLICA PARA AUXILIO DE TRANSPORTE
+    bool eligibleForTransportationAllowance = AllowanceCalculator.IsEligibleForTransportationAllowance(baseSalary);
+
+    // VALOR AUXILIO DE TRANSPORTE
+    decimal transportationAllowance = AllowanceCalculator.CalculateTransportationAllowance(eligibleForTransportationAllowance);
+
+    // VALOR DIARIO DEL AUXILIO DE TRANSPORTE
+    decimal dailyTransportationAllowance = AllowanceCalculator.CalculateDailyTransportationAllowance(eligibleForTransportationAllowance);
+
+    #endregion
+
+
+
+
+    #region CONCEPTOS TRABAJADOS
+
+    // HORAS TRABAJADAS
+    decimal workedHours = BaseRateCalculator.CalculateWorkedHours(workedDays);
+
+    // SALARIO BASE A PAGAR
+    decimal baseSalaryPay = BaseRateCalculator.CalculateBaseSalaryPay(hourlyRate, workedHours);
+
+    // HORAS EXTRAS DIURNAS
+    decimal dayOvertimePay = OvertimeCalculator.CalculateDayOvertimePay(dayOvertimeHours, dayOvertimeRate);
+
+    // HORAS EXTRAS NOCTURNAS
+    decimal nightOvertimePay = OvertimeCalculator.CalculateNightOvertimePay(nightOvertimeHours, nightOvertimeRate);
+
+    // HORAS EXTRAS DIURNAS EN DOMINGO/FESTIVO
+    decimal holidayDayOvertimePay = OvertimeCalculator.CalculateHolidayDayOvertimePay(holidayDayOvertimeHours, holidayDayOvertimeRate);
+
+    // HORAS EXTRAS NOCTURNAS EN DOMINGO/FESTIVO
+    decimal holidayNightOvertimePay = OvertimeCalculator.CalculateHolidayNightOvertimePay(holidayNightOvertimeHours, holidayNightOvertimeRate);
+
+    // DIA TRABAJADO EN DOMINGO/FESTIVO
+    decimal holidayWorkPay = OvertimeCalculator.CalculateHolidayWorkPay(holidayDaysWorked, holidayWorkRate);
+
+    // TOTAL PAGOS ADICIONALES
+    decimal totalAdditionalPay = OvertimeCalculator.CalculateTotalAdditionalPay(dayOvertimePay,
+                                                                                nightOvertimePay,
+                                                                                holidayDayOvertimePay,
+                                                                                holidayNightOvertimePay,
+                                                                                holidayWorkPay);
+
+    #endregion
+
+
+
+
+    #region RESUMEN DE NÓMINA
+
+    // SALARIO DEVENGADO
+    decimal accruedSalary = BaseRateCalculator.CalculateAccruedSalary(baseSalaryPay, totalAdditionalPay, holidayWorkPay);
+
+    // AUXILIO DE TRANSPORTE
+    decimal transportationAllowancePay = AllowanceCalculator.CalculateTransportationAllowancePay(dailyTransportationAllowance, workedDays);
+
+    // TOTAL DEVENGADO
+    decimal totalAccruedSalary = BaseRateCalculator.CalculateTotalAccruedSalary(accruedSalary, transportationAllowancePay);
+
+    // DESCUENTO DE SALUD
+    decimal healthDeduction = DeductionCalculator.CalculateHealthDeductionAmount(accruedSalary);
+
+    // DESCUENTO DE PENSIÓN
+    decimal pensionDeduction = DeductionCalculator.CalculatePensionDeductionAmount(accruedSalary);
+
+    // TOTAL DEDUCCIONES
+    decimal totalDeductions = DeductionCalculator.CalculateTotalDeductions(healthDeduction, pensionDeduction);
+
+    // NETO A PAGAR
+    decimal netPay = BaseRateCalculator.CalculateNetPay(totalAccruedSalary, totalDeductions);
+
+    #endregion
+
+
+
+
+    #region MOSTRAR DESGLOSE DE TARIFAS
+
+    if (showRateBreakdown)
+    {
+        Print.PrintLine('=');
+        Print.PrintText($"DESGLOSE DE TARIFAS");
+        Print.PrintLine('=');
+
+        // HORAS HORAS MENSUALES POR LEY
+        BaseRateCalculator.ShowMonthlyLegalHours(monthlyWorkedHours, false, false);
+
+        // VALOR DEL DIA
+        BaseRateCalculator.ShowDailyRate(dailyRate, false, false);
+
+        // VALOR DE LA HORA REGULAR
+        BaseRateCalculator.ShowHourlyRate(hourlyRate, false, false);
+
+        // VALOR HORA EXTRA DIURNA
+        OvertimeCalculator.ShowDayOvertimeRate(dayOvertimeRate, false, false);
+
+        // VALOR HORA EXTRA NOCTURNA
+        OvertimeCalculator.ShowNightOvertimeRate(nightOvertimeRate, false, false);
+
+        // VALOR HORA EXTRA DIURNA DOMINICAL O FESTIVA
+        OvertimeCalculator.ShowHolidayDayOvertimeRate(holidayDayOvertimeRate, false, false);
+
+        // VALOR HORA EXTRA NOCTURNA DOMINICAL O FESTIVA
+        OvertimeCalculator.ShowHolidayNightOvertimeRate(holidayNightOvertimeRate, false, false);
+
+        // VALOR DIAS DOMINICALES O FESTIVOS TRABAJADOS
+        OvertimeCalculator.ShowHolidayWorkRate(holidayWorkRate, false, false);
+
+        // VALOR AUXILIO DE TRANSPORTE
+        AllowanceCalculator.ShowTransportationAllowance(eligibleForTransportationAllowance, transportationAllowance, false, false);
+
+        // VALOR DIARIO DEL AUXILIO DE TRANSPORTE
+        AllowanceCalculator.ShowDailyTransportationAllowance(eligibleForTransportationAllowance, dailyTransportationAllowance, false, false);
+
+        // VALOR DESCUENTO DE SALUD
+        DeductionCalculator.ShowHealthDeductionPercentage(false, false);
+
+        // VALOR DESCUENTO DE PENSIÓN
+        DeductionCalculator.ShowPensionDeductionPercentage(false, true);
+    }
+
+    #endregion
+
+
+
+
+    #region MOSTRAR DETALLE DE NÓMINA
+
+    if (showPayrollDetails)
+    {
+        Print.PrintLine('=');
+        Print.PrintText($"DETALLE DE NÓMINA");
+        Print.PrintLine('=');
+
+        // DIAS TRABAJADAS
+        BaseRateCalculator.ShowWorkedDays(workedDays, false, false);
+
+        // HORAS TRABAJADAS
+        BaseRateCalculator.ShowWorkedHours(workedHours, false, false);
+
+        // SALARIO BASE
+        BaseRateCalculator.ShowBaseSalaryPay(baseSalaryPay, false, false);
+
+        // HORAS EXTRAS DIURNAS
+        OvertimeCalculator.ShowDayOvertimePay(dayOvertimeHours, dayOvertimePay, false, false);
+
+        // HORAS EXTRAS NOCTURNAS
+        OvertimeCalculator.ShowNightOvertimePay(nightOvertimeHours, nightOvertimePay, false, false);
+
+        // HORAS EXTRAS DIURNAS EN DOMINGO/FESTIVO
+        OvertimeCalculator.ShowHolidayDayOvertimePay(holidayDayOvertimeHours, holidayDayOvertimePay, false, false);
+
+        // HORAS EXTRAS NOCTURNAS EN DOMINGO/FESTIVO
+        OvertimeCalculator.ShowHolidayNightOvertimePay(holidayNightOvertimeHours, holidayNightOvertimePay, false, false);
+
+        // DIA TRABAJADO EN DOMINGO/FESTIVO
+        OvertimeCalculator.ShowHolidayWorkPay(holidayDaysWorked, holidayWorkPay, false, true);
+    }
+
+    #endregion
+
+
+
+
+    #region MOSTRAR RESUMEN DE PAGO
+
+    if (showPaySummary)
+    {
+        Print.PrintLine('=');
+        Print.PrintText($"RESUMEN DE PAGO");
+        Print.PrintLine('=');
+
+        // SALARIO DEVENGADO
+        BaseRateCalculator.ShowAccruedSalary(accruedSalary, true, false);
+
+        // AUXILIO DE TRANSPORTE
+        AllowanceCalculator.ShowTransportationAllowancePay(eligibleForTransportationAllowance, transportationAllowancePay, true, false);
+        
+        // TOTAL DEVENGADO
+        BaseRateCalculator.ShowTotalAccruedSalary(eligibleForTransportationAllowance, totalAccruedSalary, true, false);
+
+        // DESCUENTO SALUD
+        DeductionCalculator.ShowHealthDeductionAmount(healthDeduction, true, false);
+
+        // DESCUENTO PENSIÓN
+        DeductionCalculator.ShowPensionDeductionAmount(pensionDeduction, true, false);
+
+        // NETO A PAGAR
+        BaseRateCalculator.ShowNetPay(netPay, true, true);
+    }
+
+    #endregion
+}
 
 #endregion

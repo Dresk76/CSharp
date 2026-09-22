@@ -1,45 +1,89 @@
-using System.Globalization;
-
 namespace PayrollConsoleApp
 {
     public static class DeductionCalculator
     {
-        // Tasas de Descuento
-        private const decimal HealthDeductionRate = 0.04m;
-        private const decimal PensionDeductionRate = 0.04m;
+        // TASAS DE DESCUENTO
+        private const decimal HealthDeductionRate   = 0.04m;
+        private const decimal PensionDeductionRate  = 0.04m;
 
 
-        #region DESCUENTO SALUD 4%
 
-        // CALCULAR VALOR DESCUENTO SALUD
-        public static decimal CalculateHealthDeductionAmount(decimal baseSalary)
+
+        #region DESCUENTO DE SALUD 4%
+
+        // MOSTRAR PORCENTAJE DE DESCUENTO DE SALUD
+        public static void ShowHealthDeductionPercentage(bool showSeparator, bool showSpace)
         {
-            decimal healthDeductionAmount = baseSalary * HealthDeductionRate;
-            return Math.Round(healthDeductionAmount, 2, MidpointRounding.AwayFromZero);
+            Print.ShowPercentage("Porcentaje descuento salud", HealthDeductionRate, showSeparator, showSpace);
         }
 
-        // MOSTRAR VALOR DESCUENTO SALUD
-        public static void ShowHealthDeductionAmount(decimal healthDeductionAmount, bool showSeparator = true)
+
+
+        // CALCULAR VALOR A DESCONTAR DE SALUD
+        public static decimal CalculateHealthDeductionAmount(decimal accruedSalary)
         {
-            Print.ShowMoney("Valor Descuento Salud (4%)", healthDeductionAmount, showSeparator);
+            decimal healthDeduction = accruedSalary * HealthDeductionRate;
+
+            return healthDeduction;
+        }
+
+
+        // MOSTRAR VALOR A DESCONTAR DE SALUD
+        public static void ShowHealthDeductionAmount(decimal healthDeduction, bool showSeparator, bool showSpace)
+        {
+            Print.ShowMoney("Descuento salud (4%)", healthDeduction, showSeparator, showSpace);
         }
 
         #endregion
 
 
-        #region DESCUENTO PENSIÓN 4%
 
-        // CALCULAR VALOR DESCUENTO PENSIÓN
-        public static decimal CalculatePensionDeductionAmount(decimal baseSalary)
+
+        #region DESCUENTO DE PENSIÓN 4%
+
+        // MOSTRAR PORCENTAJE DE DESCUENTO DE PENSIÓN
+        public static void ShowPensionDeductionPercentage(bool showSeparator, bool showSpace)
         {
-            decimal pensionDeductionAmount = baseSalary * PensionDeductionRate;
-            return Math.Round(pensionDeductionAmount, 2, MidpointRounding.AwayFromZero);
+            Print.ShowPercentage("Porcentaje descuento pensión", PensionDeductionRate, showSeparator, showSpace);
         }
 
-        // MOSTRAR VALOR DESCUENTO PENSIÓN
-        public static void ShowPensionDeductionAmount(decimal pensionDeductionAmount, bool showSeparator = true)
+
+
+        // CALCULAR VALOR A DESCONTAR DE PENSIÓN
+        public static decimal CalculatePensionDeductionAmount(decimal accruedSalary)
         {
-            Print.ShowMoney("Valor Descuento Pensión (4%)", pensionDeductionAmount, showSeparator);
+            decimal pensionDeduction = accruedSalary * PensionDeductionRate;
+
+            return pensionDeduction;
+        }
+
+
+        // MOSTRAR VALOR A DESCONTAR DE PENSIÓN
+        public static void ShowPensionDeductionAmount(decimal pensionDeduction, bool showSeparator, bool showSpace)
+        {
+            Print.ShowMoney("Descuento pensión (4%)", pensionDeduction, showSeparator, showSpace);
+        }
+
+        #endregion
+
+
+
+
+        #region TOTAL DEDUCCIONES
+
+        // CALCULAR TOTAL DEDUCCIONES
+        public static decimal CalculateTotalDeductions(decimal healthDeduction, decimal pensionDeduction)
+        {
+            decimal totalDeductions = healthDeduction + pensionDeduction;
+
+            return totalDeductions;
+        }
+
+
+        // MOSTRAR TOTAL DEDUCCIONES
+        public static void ShowTotalDeductions(decimal totalDeductions, bool showSeparator, bool showSpace)
+        {
+            Print.ShowMoney("Total deducciones", totalDeductions, showSeparator, showSpace);
         }
 
         #endregion
